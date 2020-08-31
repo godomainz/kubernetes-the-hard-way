@@ -11,7 +11,7 @@ In this section you will generate kubeconfig files for the `controller manager`,
 Each kubeconfig requires a Kubernetes API Server to connect to. To support high availability the IP address assigned to the load balancer will be used. In our case it is `192.168.5.30`
 
 ```
-LOADBALANCER_ADDRESS=192.168.5.30
+LOADBALANCER_ADDRESS=192.168.111.137
 ```
 
 ### The kube-proxy Kubernetes Configuration File
@@ -162,7 +162,7 @@ Reference docs for kubeconfig [here](https://kubernetes.io/docs/tasks/access-app
 Copy the appropriate `kube-proxy` kubeconfig files to each worker instance:
 
 ```
-for instance in worker-1 worker-2; do
+for instance in worker1 ceph; do
   scp kube-proxy.kubeconfig ${instance}:~/
 done
 ```
@@ -170,7 +170,7 @@ done
 Copy the appropriate `admin.kubeconfig`, `kube-controller-manager` and `kube-scheduler` kubeconfig files to each controller instance:
 
 ```
-for instance in master-1 master-2; do
+for instance in master1 master2; do
   scp admin.kubeconfig kube-controller-manager.kubeconfig kube-scheduler.kubeconfig ${instance}:~/
 done
 ```
