@@ -35,8 +35,9 @@ EOF
 Copy the `encryption-config.yaml` encryption config file to each controller instance:
 
 ```
-for instance in master-1 master-2; do
-  scp encryption-config.yaml ${instance}:~/
+for instance in master1 master2; do
+  ssh ${instance} "mkdir -p ~/kubernetes_config"
+  scp encryption-config.yaml ${instance}:~/kubernetes_config
 done
 ```
 Reference: https://kubernetes.io/docs/tasks/administer-cluster/encrypt-data/#encrypting-your-data

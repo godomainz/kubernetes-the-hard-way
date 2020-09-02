@@ -163,7 +163,8 @@ Copy the appropriate `kube-proxy` kubeconfig files to each worker instance:
 
 ```
 for instance in worker1 ceph; do
-  scp kube-proxy.kubeconfig ${instance}:~/
+  ssh ${instance} "mkdir -p ~/kubernetes_config"
+  scp kube-proxy.kubeconfig ${instance}:~/kubernetes_config
 done
 ```
 
@@ -171,7 +172,8 @@ Copy the appropriate `admin.kubeconfig`, `kube-controller-manager` and `kube-sch
 
 ```
 for instance in master1 master2; do
-  scp admin.kubeconfig kube-controller-manager.kubeconfig kube-scheduler.kubeconfig ${instance}:~/
+  ssh ${instance} "mkdir -p ~/kubernetes_config"
+  scp admin.kubeconfig kube-controller-manager.kubeconfig kube-scheduler.kubeconfig ${instance}:~/kubernetes_config
 done
 ```
 

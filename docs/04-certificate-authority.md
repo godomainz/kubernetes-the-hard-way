@@ -239,11 +239,12 @@ Copy the appropriate certificates and private keys to each controller instance:
 
 ```
 for instance in master1 master2; do
+  ssh ${instance} "mkdir -p ~/kubernetes_config"
   scp ca.crt ca.key kube-apiserver.key kube-apiserver.crt kube-proxy.key kube-proxy.crt kube-controller-manager.key kube-controller-manager.crt\
     kube-scheduler.crt kube-scheduler.key \
     service-account.key service-account.crt \
     etcd-server.key etcd-server.crt \
-    ${instance}:~/
+    ${instance}:~/kubernetes_config
 done
 ```
 
