@@ -192,9 +192,8 @@ basicConstraints = CA:FALSE
 keyUsage = nonRepudiation, digitalSignature, keyEncipherment
 subjectAltName = @alt_names
 [alt_names]
-IP.2 = 192.168.111.138
-IP.3 = 192.168.111.242
-IP.3 = 127.0.0.1
+IP.1 = 192.168.111.138
+IP.2 = 192.168.111.242
 EOF
 ```
 

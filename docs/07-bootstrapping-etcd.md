@@ -17,13 +17,27 @@ The commands in this lab must be run on each controller instance: `master-1`, an
 Download the official etcd release binaries from the [coreos/etcd](https://github.com/coreos/etcd) GitHub project:
 
 ```
+Use the latest version
+wget -q --show-progress --https-only --timestamping \
+https://github.com/etcd-io/etcd/releases/download/v3.4.13/etcd-v3.4.13-linux-amd64.tar.gz
+
+OLD verison
 wget -q --show-progress --https-only --timestamping \
   "https://github.com/coreos/etcd/releases/download/v3.3.9/etcd-v3.3.9-linux-amd64.tar.gz"
+
+
 ```
 
 Extract and install the `etcd` server and the `etcdctl` command line utility:
 
 ```
+Use the latest version
+{
+  tar -xvf etcd-v3.4.13-linux-amd64.tar.gz
+  sudo mv etcd-v3.4.13-linux-amd64/etcd* /usr/local/bin/
+}
+
+OLD verison
 {
   tar -xvf etcd-v3.3.9-linux-amd64.tar.gz
   sudo mv etcd-v3.3.9-linux-amd64/etcd* /usr/local/bin/
@@ -52,7 +66,9 @@ ETCD_NAME=$(hostname -s)
 ```
 
 Create the `etcd.service` systemd unit file:
-
+this line --> --initial-cluster master1=https://192.168.111.138:2380,master2=https:/192.168.111.242:2380
+master1, masteR2 means host names of the master nodes
+192.168.111.138 , 192.168.111.242 are IP addresses of master nodes
 ```
 cat <<EOF | sudo tee /etc/systemd/system/etcd.service
 [Unit]
@@ -75,7 +91,7 @@ ExecStart=/usr/local/bin/etcd \\
   --listen-client-urls https://${INTERNAL_IP}:2379,https://127.0.0.1:2379 \\
   --advertise-client-urls https://${INTERNAL_IP}:2379 \\
   --initial-cluster-token etcd-cluster-0 \\
-  --initial-cluster master-1=https://192.168.5.11:2380,master-2=https://192.168.5.12:2380 \\
+  --initial-cluster master1=https://192.168.111.138:2380,master2=https://192.168.111.242:2380 \\
   --initial-cluster-state new \\
   --data-dir=/var/lib/etcd
 Restart=on-failure
@@ -86,6 +102,7 @@ WantedBy=multi-user.target
 EOF
 ```
 
+
 ### Start the etcd Server
 
 ```
@@ -95,6 +112,8 @@ EOF
   sudo systemctl start etcd
 }
 ```
+### Check the status of the service
+sudo service etcd status
 
 > Remember to run the above commands on each controller node: `master-1`, and `master-2`.
 
