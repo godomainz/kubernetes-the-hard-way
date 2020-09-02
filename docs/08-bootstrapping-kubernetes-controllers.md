@@ -239,6 +239,49 @@ In this section you will provision an external load balancer to front the Kubern
 
 Login to `loadbalancer` instance using SSH Terminal.
 
+#Install nginx
+sudo apt update
+sudo apt install nginx -y
+sudo ufw enable
+sudo ufw app list
+sudo ufw allow 'Nginx HTTP'
+sudo ufw allow 'Nginx HTTPS'
+systemctl status nginx
+
+create docker-compase.yml
+version: "3"
+services:
+  nginxproxy:
+    image: nginx
+    restart: always
+    ports:
+     - 6443:80
+     - 443:80
+    volumes:
+     - "./nginx.conf:/etc/nginx/nginx.conf"
+
+create nginx.conf
+events {
+  multi_accept on;
+  worker_connections  4096;  ## Default: 1024
+}
+http {
+	upstream myproject {
+	    server 192.168.111.138:6443;
+	    server 192.168.111.242:6443;
+	}
+
+	server {
+	    listen 80;
+	    location / {
+	      proxy_pass https://myproject;
+	    }
+	 }
+}
+
+
+If you don't have docker installed use above config file to configure nginx
+
 ```
 #Install HAProxy
 loadbalancer# sudo apt-get update && sudo apt-get install -y haproxy
@@ -248,7 +291,7 @@ loadbalancer# sudo apt-get update && sudo apt-get install -y haproxy
 ```
 loadbalancer# cat <<EOF | sudo tee /etc/haproxy/haproxy.cfg 
 frontend kubernetes
-    bind 192.168.5.30:6443
+    bind 192.168.111.137:80
     option tcplog
     mode tcp
     default_backend kubernetes-master-nodes
@@ -257,8 +300,8 @@ backend kubernetes-master-nodes
     mode tcp
     balance roundrobin
     option tcp-check
-    server master-1 192.168.5.11:6443 check fall 3 rise 2
-    server master-2 192.168.5.12:6443 check fall 3 rise 2
+    server master1 192.168.111.138:6443 check fall 3 rise 2
+    server master2 192.168.111.242:6443 check fall 3 rise 2
 EOF
 ```
 
@@ -271,7 +314,7 @@ loadbalancer# sudo service haproxy restart
 Make a HTTP request for the Kubernetes version info:
 
 ```
-curl  https://192.168.5.30:6443/version -k
+curl  https://192.168.111.137/version -k
 ```
 
 > output
