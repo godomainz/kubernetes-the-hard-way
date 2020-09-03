@@ -248,6 +248,10 @@ sudo ufw allow 'Nginx HTTP'
 sudo ufw allow 'Nginx HTTPS'
 systemctl status nginx
 
+openssl genrsa -out ssl.key 2048
+openssl req -new -key ssl.key -subj "/CN=ssl" -out ssl.csr
+openssl x509 -req -in ssl.csr -signkey ssl.key -CAcreateserial  -out ssl.crt -days 1000
+
 create docker-compase.yml
 version: "3"
 services:
@@ -255,10 +259,11 @@ services:
     image: nginx
     restart: always
     ports:
-     - 6443:80
-     - 443:80
+     - 6443:443
     volumes:
      - "./nginx.conf:/etc/nginx/nginx.conf"
+     - "./ssl.crt:/etc/nginx/certs/ssl.crt"
+     - "./ssl.key:/etc/nginx/certs/ssl.key"
 
 create nginx.conf
 events {
@@ -275,8 +280,19 @@ http {
 	    listen 80;
 	    location / {
 	      proxy_pass https://myproject;
+		  error_log /var/log/front_end_http_errors.log;
 	    }
 	 }
+
+	 server {
+		listen 443 ssl;
+		ssl_certificate /etc/nginx/certs/ssl.crt;
+		ssl_certificate_key /etc/nginx/certs/ssl.key;
+		location / {
+			proxy_pass https://myproject;
+			error_log /var/log/front_end_ssl_errors.log;
+		}
+	}
 }
 
 
