@@ -91,7 +91,7 @@ ExecStart=/usr/local/bin/etcd \\
   --listen-client-urls https://${INTERNAL_IP}:2379,https://127.0.0.1:2379 \\
   --advertise-client-urls https://${INTERNAL_IP}:2379 \\
   --initial-cluster-token etcd-cluster-0 \\
-  --initial-cluster master1=https://192.168.111.138:2380,master2=https://192.168.111.242:2380 \\
+  --initial-cluster master-1=https://192.168.111.246:2380,master-2=https://192.168.111.247:2380 \\
   --initial-cluster-state new \\
   --data-dir=/var/lib/etcd
 Restart=on-failure
@@ -114,6 +114,7 @@ EOF
 ```
 ### Check the status of the service
 sudo service etcd status
+journalctl -u etcd -f
 
 > Remember to run the above commands on each controller node: `master-1`, and `master-2`.
 
@@ -123,7 +124,13 @@ List the etcd cluster members:
 
 ```
 sudo ETCDCTL_API=3 etcdctl member list \
-  --endpoints=https://192.168.111.242:2379 \
+  --endpoints=https://192.168.111.246:2379 \
+  --cacert=/etc/etcd/ca.crt \
+  --cert=/etc/etcd/etcd-server.crt \
+  --key=/etc/etcd/etcd-server.key
+
+  sudo ETCDCTL_API=3 etcdctl member list \
+  --endpoints=https://127.0.0.1:2379 \
   --cacert=/etc/etcd/ca.crt \
   --cert=/etc/etcd/etcd-server.crt \
   --key=/etc/etcd/etcd-server.key

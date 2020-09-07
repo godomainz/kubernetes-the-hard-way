@@ -25,10 +25,16 @@ Download the official Kubernetes release binaries:
 ```
 This is the NEW way
 
-wget -q --show-progress --https-only --timestamping https://github.com/kubernetes/kubernetes/releases/download/v1.19.0/kubernetes.tar.gz
-tar -xvf kubernetes.tar.gz
-./kubernetes/cluster/get-kube-binaries.sh
-tar -xvf kubernetes/server/kubernetes-server-linux-amd64.tar.gz
+{
+  cd ~
+  mkdir -p kubernetes_config
+  cd kubernetes_config
+  wget -q --show-progress --https-only --timestamping https://github.com/kubernetes/kubernetes/releases/download/v1.19.0/kubernetes.tar.gz
+  tar -xvf kubernetes.tar.gz
+  echo Y |  ./kubernetes/cluster/get-kube-binaries.sh
+  tar -xvf kubernetes/server/kubernetes-server-linux-amd64.tar.gz
+}
+
 
 
 
@@ -111,7 +117,7 @@ ExecStart=/usr/local/bin/kube-apiserver \\
   --etcd-cafile=/var/lib/kubernetes/ca.crt \\
   --etcd-certfile=/var/lib/kubernetes/etcd-server.crt \\
   --etcd-keyfile=/var/lib/kubernetes/etcd-server.key \\
-  --etcd-servers=https://192.168.111.138:2379,https://192.168.111.242:2379 \\
+  --etcd-servers=https://192.168.111.246:2379,https://192.168.111.247:2379 \\
   --event-ttl=1h \\
   --encryption-provider-config=/var/lib/kubernetes/encryption-config.yaml \\
   --kubelet-certificate-authority=/var/lib/kubernetes/ca.crt \\
@@ -307,7 +313,7 @@ loadbalancer# sudo apt-get update && sudo apt-get install -y haproxy
 ```
 loadbalancer# cat <<EOF | sudo tee /etc/haproxy/haproxy.cfg 
 frontend kubernetes
-    bind 192.168.111.137:80
+    bind 192.168.111.245:6443
     option tcplog
     mode tcp
     default_backend kubernetes-master-nodes
@@ -316,8 +322,8 @@ backend kubernetes-master-nodes
     mode tcp
     balance roundrobin
     option tcp-check
-    server master1 192.168.111.138:6443 check fall 3 rise 2
-    server master2 192.168.111.242:6443 check fall 3 rise 2
+    server master1 192.168.111.246:6443 check fall 3 rise 2
+    server master2 192.168.111.247:6443 check fall 3 rise 2
 EOF
 ```
 
@@ -330,7 +336,7 @@ loadbalancer# sudo service haproxy restart
 Make a HTTP request for the Kubernetes version info:
 
 ```
-curl  https://192.168.111.137/version -k
+curl  https://192.168.111.245:6443/version -k
 ```
 
 > output

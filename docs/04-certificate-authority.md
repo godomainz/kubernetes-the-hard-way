@@ -153,11 +153,12 @@ DNS.1 = kubernetes
 DNS.2 = kubernetes.default
 DNS.3 = kubernetes.default.svc
 DNS.4 = kubernetes.default.svc.cluster.local
-IP.1 = 10.96.0.1
-IP.2 = 192.168.111.137
-IP.3 = 192.168.111.138
-IP.4 = 192.168.111.242
-IP.5 = 127.0.0.1
+IP.1 = 192.168.111.245
+IP.2 = 192.168.111.246
+IP.3 = 192.168.111.247
+IP.4 = 192.168.111.250
+IP.5 = 192.168.111.249
+IP.6 = 127.0.0.1
 EOF
 ```
 
@@ -193,8 +194,8 @@ basicConstraints = CA:FALSE
 keyUsage = nonRepudiation, digitalSignature, keyEncipherment
 subjectAltName = @alt_names
 [alt_names]
-IP.1 = 192.168.111.138
-IP.2 = 192.168.111.242
+IP.1 = 192.168.111.246
+IP.2 = 192.168.111.247
 IP.3 = 127.0.0.1
 EOF
 ```
@@ -239,7 +240,7 @@ service-account.crt
 Copy the appropriate certificates and private keys to each controller instance:
 
 ```
-for instance in master1 master2; do
+for instance in master-1 master-2; do
   ssh ${instance} "mkdir -p ~/kubernetes_config"
   scp ca.crt ca.key kube-apiserver.key kube-apiserver.crt kube-proxy.key kube-proxy.crt kube-controller-manager.key kube-controller-manager.crt\
     kube-scheduler.crt kube-scheduler.key \
@@ -248,7 +249,7 @@ for instance in master1 master2; do
     ${instance}:~/kubernetes_config
 done
 ```
-
+ 
 > The `kube-proxy`, `kube-controller-manager`, `kube-scheduler`, and `kubelet` client certificates will be used to generate client authentication configuration files in the next lab. These certificates will be embedded into the client authentication configuration files. We will then copy those configuration files to the other master nodes.
 
 Next: [Generating Kubernetes Configuration Files for Authentication](05-kubernetes-configuration-files.md)

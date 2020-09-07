@@ -20,7 +20,7 @@ Generate a certificate and private key for one worker node:
 On master-1:
 
 ```
-master-1$ cat > openssl-worker1.cnf <<EOF
+master-1$ cat > openssl-worker-1.cnf <<EOF
 [req]
 req_extensions = v3_req
 distinguished_name = req_distinguished_name
@@ -30,13 +30,16 @@ basicConstraints = CA:FALSE
 keyUsage = nonRepudiation, digitalSignature, keyEncipherment
 subjectAltName = @alt_names
 [alt_names]
-DNS.1 = worker1
-IP.1 = 192.168.111.243
+DNS.1 = worker-1
+IP.1 = 192.168.111.250
 EOF
 
-openssl genrsa -out worker1.key 2048
-openssl req -new -key worker1.key -subj "/CN=system:node:worker-1/O=system:nodes" -out worker1.csr -config openssl-worker1.cnf
-openssl x509 -req -in worker1.csr -CA ca.crt -CAkey ca.key -CAcreateserial  -out worker1.crt -extensions v3_req -extfile openssl-worker1.cnf -days 1000
+{
+  openssl genrsa -out worker-1.key 2048
+  openssl req -new -key worker-1.key -subj "/CN=system:node:worker-1/O=system:nodes" -out worker-1.csr -config openssl-worker-1.cnf
+  openssl x509 -req -in worker-1.csr -CA ca.crt -CAkey ca.key -CAcreateserial  -out worker-1.crt -extensions v3_req -extfile openssl-worker-1.cnf -days 1000
+}
+
 ```
 
 Results:
@@ -52,7 +55,7 @@ When generating kubeconfig files for Kubelets the client certificate matching th
 
 Get the kub-api server load-balancer IP.
 ```
-LOADBALANCER_ADDRESS=192.168.111.137
+LOADBALANCER_ADDRESS=192.168.111.245
 ```
 
 Generate a kubeconfig file for the first worker node.
@@ -63,35 +66,38 @@ On master-1:
   kubectl config set-cluster kubernetes-the-hard-way \
     --certificate-authority=ca.crt \
     --embed-certs=true \
-    --server=http://${LOADBALANCER_ADDRESS}:6443 \
-    --kubeconfig=worker1.kubeconfig
+    --server=https://${LOADBALANCER_ADDRESS}:6443 \
+    --kubeconfig=worker-1.kubeconfig
 
-  kubectl config set-credentials system:node:worker1 \
-    --client-certificate=worker1.crt \
-    --client-key=worker1.key \
+  kubectl config set-credentials system:node:worker-1 \
+    --client-certificate=worker-1.crt \
+    --client-key=worker-1.key \
     --embed-certs=true \
-    --kubeconfig=worker1.kubeconfig
+    --kubeconfig=worker-1.kubeconfig
 
   kubectl config set-context default \
     --cluster=kubernetes-the-hard-way \
-    --user=system:node:worker1 \
-    --kubeconfig=worker1.kubeconfig
+    --user=system:node:worker-1 \
+    --kubeconfig=worker-1.kubeconfig
 
-  kubectl config use-context default --kubeconfig=worker1.kubeconfig
+  kubectl config use-context default --kubeconfig=worker-1.kubeconfig
 }
 ```
 
 Results:
 
 ```
-worker1.kubeconfig
+worker-1.kubeconfig
 ```
 
 ### Copy certificates, private keys and kubeconfig files to the worker node:
 On master-1:
 ```
-ssh worker1 "mkdir -p ~/kubernetes_config"
-master-1$ scp ca.crt worker1.crt worker1.key worker1.kubeconfig worker1:~/kubernetes_config
+{
+  ssh worker-1 "mkdir -p ~/kubernetes_config"
+  scp ca.crt worker-1.crt worker-1.key worker-1.kubeconfig worker-1:~/kubernetes_config
+}
+
 ```
 
 ### Download and Install Worker Binaries
@@ -99,17 +105,21 @@ master-1$ scp ca.crt worker1.crt worker1.key worker1.kubeconfig worker1:~/kubern
 Going forward all activities are to be done on the `worker-1` node.
 
 This is the NEW way
+{
+  wget -q --show-progress --https-only --timestamping https://github.com/kubernetes/kubernetes/releases/download/v1.19.0/kubernetes.tar.gz
+  tar -xvf kubernetes.tar.gz
+  echo "Y" | ./kubernetes/cluster/get-kube-binaries.sh
+  tar -xvf kubernetes/server/kubernetes-server-linux-amd64.tar.gz
+}
 
-wget -q --show-progress --https-only --timestamping https://github.com/kubernetes/kubernetes/releases/download/v1.19.0/kubernetes.tar.gz
-tar -xvf kubernetes.tar.gz
-./kubernetes/cluster/get-kube-binaries.sh
-tar -xvf kubernetes/server/kubernetes-server-linux-amd64.tar.gz
 
 
 
 This is the OLD way
 On worker-1:
 ```
+
+
 worker-1$ wget -q --show-progress --https-only --timestamping \
   https://storage.googleapis.com/kubernetes-release/release/v1.13.0/bin/linux/amd64/kubectl \
   https://storage.googleapis.com/kubernetes-release/release/v1.13.0/bin/linux/amd64/kube-proxy \
