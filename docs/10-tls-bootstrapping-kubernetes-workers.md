@@ -27,9 +27,10 @@ So let's get started!
 **kube-apiserver** - Ensure bootstrap token based authentication is enabled on the kube-apiserver.
 
 `--enable-bootstrap-token-auth=true`
+run this command on master node : ps aux | grep kube-api
 
 **kube-controller-manager** - The certificate requests are signed by the kube-controller-manager ultimately. The kube-controller-manager requires the CA Certificate and Key to perform these operations.
-
+run this command on master node : ps aux | grep kube-controller-manager
 ```
   --cluster-signing-cert-file=/var/lib/kubernetes/ca.crt \\
   --cluster-signing-key-file=/var/lib/kubernetes/ca.key
@@ -40,7 +41,11 @@ So let's get started!
 Copy the ca certificate to the worker node:
 
 ```
-scp ca.crt worker-2:~/
+{
+  ssh worker-2 "mkdir -p ~/kubernetes_config"
+  scp ca.crt worker-2:~/kubernetes_config
+}
+
 ```
 
 ## Step 1 Configure the Binaries on the Worker node
@@ -48,6 +53,15 @@ scp ca.crt worker-2:~/
 ### Download and Install Worker Binaries
 
 ```
+
+This is the NEW way
+{
+  wget -q --show-progress --https-only --timestamping https://github.com/kubernetes/kubernetes/releases/download/v1.19.0/kubernetes.tar.gz
+  tar -xvf kubernetes.tar.gz
+  echo "Y" | ./kubernetes/cluster/get-kube-binaries.sh
+  tar -xvf kubernetes/server/kubernetes-server-linux-amd64.tar.gz
+}
+
 wget -q --show-progress --https-only --timestamping \
   https://storage.googleapis.com/kubernetes-release/release/v1.13.0/bin/linux/amd64/kubectl \
   https://storage.googleapis.com/kubernetes-release/release/v1.13.0/bin/linux/amd64/kube-proxy \
@@ -71,6 +85,13 @@ sudo mkdir -p \
 Install the worker binaries:
 
 ```
+
+This is the NEW way
+{
+  chmod +x kubernetes/server/bin/kubectl kubernetes/server/bin/kube-proxy kubernetes/server/bin/kubelet
+  sudo mv kubernetes/server/bin/kubectl kubernetes/server/bin/kube-proxy kubernetes/server/bin/kubelet /usr/local/bin/
+}
+
 {
   chmod +x kubectl kube-proxy kubelet
   sudo mv kubectl kube-proxy kubelet /usr/local/bin/
@@ -89,6 +110,7 @@ Bootstrap Tokens take the form of a 6 character token id followed by 16 characte
 Bootstrap Tokens are created as a secret in the kube-system namespace.
 
 ```
+
 cat > bootstrap-token-07401b.yaml <<EOF
 apiVersion: v1
 kind: Secret
@@ -231,10 +253,13 @@ Here, we don't have the certificates yet. So we cannot create a kubeconfig file.
 This is to be done on the `worker-2` node.
 
 ```
-sudo kubectl config --kubeconfig=/var/lib/kubelet/bootstrap-kubeconfig set-cluster bootstrap --server='https://192.168.5.30:6443' --certificate-authority=/var/lib/kubernetes/ca.crt
-sudo kubectl config --kubeconfig=/var/lib/kubelet/bootstrap-kubeconfig set-credentials kubelet-bootstrap --token=07401b.f395accd246ae52d
-sudo kubectl config --kubeconfig=/var/lib/kubelet/bootstrap-kubeconfig set-context bootstrap --user=kubelet-bootstrap --cluster=bootstrap
-sudo kubectl config --kubeconfig=/var/lib/kubelet/bootstrap-kubeconfig use-context bootstrap
+{
+  sudo kubectl config --kubeconfig=/var/lib/kubelet/bootstrap-kubeconfig set-cluster bootstrap --server='https://192.168.111.245:6443' --certificate-authority=/var/lib/kubernetes/ca.crt
+  sudo kubectl config --kubeconfig=/var/lib/kubelet/bootstrap-kubeconfig set-credentials kubelet-bootstrap --token=07401b.f395accd246ae52d
+  sudo kubectl config --kubeconfig=/var/lib/kubelet/bootstrap-kubeconfig set-context bootstrap --user=kubelet-bootstrap --cluster=bootstrap
+  sudo kubectl config --kubeconfig=/var/lib/kubelet/bootstrap-kubeconfig use-context bootstrap
+}
+
 ```
 
 Or
@@ -245,7 +270,7 @@ apiVersion: v1
 clusters:
 - cluster:
     certificate-authority: /var/lib/kubernetes/ca.crt
-    server: https://192.168.5.30:6443
+    server: https://192.168.111.245:6443
   name: bootstrap
 contexts:
 - context:
@@ -346,7 +371,7 @@ apiVersion: kubeproxy.config.k8s.io/v1alpha1
 clientConnection:
   kubeconfig: "/var/lib/kube-proxy/kubeconfig"
 mode: "iptables"
-clusterCIDR: "192.168.5.0/24"
+clusterCIDR: "192.168.111.0/24"
 EOF
 ```
 
@@ -378,6 +403,11 @@ EOF
   sudo systemctl start kubelet kube-proxy
 }
 ```
+Check the status of the service
+sudo service kubelet status
+journalctl -u kubelet -f
+
+
 > Remember to run the above commands on worker node: `worker-2`
 
 

@@ -270,7 +270,9 @@ sudo systemctl stop kubelet kube-proxy
 ```
 Check the status of the service
 sudo service kubelet status
+journalctl -u kubelet -f
 sudo service kube-proxy status
+journalctl -u kube-proxy -f
 
 > Remember to run the above commands on worker node: `worker-1`
 
