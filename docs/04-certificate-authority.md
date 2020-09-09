@@ -137,6 +137,7 @@ kube-scheduler.crt
 The kube-apiserver certificate requires all names that various components may reach it to be part of the alternate names. These include the different DNS names, and IP addresses such as the master servers IP address, the load balancers IP address, the kube-api service IP address etc.
 
 The `openssl` command cannot take alternate names as command line parameter. So we must create a `conf` file for it:
+IP.1 = 10.96.0.1 is the ip address of kubernetes service (can identified by "kubectl get svc" command)
 
 ```
 cat > openssl.cnf <<EOF
@@ -153,12 +154,13 @@ DNS.1 = kubernetes
 DNS.2 = kubernetes.default
 DNS.3 = kubernetes.default.svc
 DNS.4 = kubernetes.default.svc.cluster.local
-IP.1 = 192.168.111.245
-IP.2 = 192.168.111.246
-IP.3 = 192.168.111.247
-IP.4 = 192.168.111.250
-IP.5 = 192.168.111.249
-IP.6 = 127.0.0.1
+IP.1 = 10.96.0.1
+IP.2 = 192.168.111.245
+IP.3 = 192.168.111.246
+IP.4 = 192.168.111.247
+IP.5 = 192.168.111.250
+IP.6 = 192.168.111.249
+IP.7 = 127.0.0.1
 EOF
 ```
 
