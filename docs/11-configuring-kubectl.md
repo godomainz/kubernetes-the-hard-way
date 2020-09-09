@@ -12,7 +12,7 @@ Generate a kubeconfig file suitable for authenticating as the `admin` user:
 
 ```
 {
-  KUBERNETES_LB_ADDRESS=192.168.5.30
+  KUBERNETES_LB_ADDRESS=192.168.111.245
 
   kubectl config set-cluster kubernetes-the-hard-way \
     --certificate-authority=ca.crt \
@@ -29,6 +29,8 @@ Generate a kubeconfig file suitable for authenticating as the `admin` user:
 
   kubectl config use-context kubernetes-the-hard-way
 }
+
+use this command after that : kubectl config view
 
 Reference doc for kubectl config [here](https://kubernetes.io/docs/tasks/access-application-cluster/configure-access-multiple-clusters/)
 ```

@@ -60,6 +60,7 @@ This is the NEW way
   tar -xvf kubernetes.tar.gz
   echo "Y" | ./kubernetes/cluster/get-kube-binaries.sh
   tar -xvf kubernetes/server/kubernetes-server-linux-amd64.tar.gz
+  tar -xvf kubernetes/client/kubernetes-client-linux-amd64.tar.gz
 }
 
 wget -q --show-progress --https-only --timestamping \
@@ -88,8 +89,8 @@ Install the worker binaries:
 
 This is the NEW way
 {
-  chmod +x kubernetes/server/bin/kubectl kubernetes/server/bin/kube-proxy kubernetes/server/bin/kubelet
-  sudo mv kubernetes/server/bin/kubectl kubernetes/server/bin/kube-proxy kubernetes/server/bin/kubelet /usr/local/bin/
+  chmod +x kubernetes/client/bin/kubectl kubernetes/server/bin/kube-proxy kubernetes/server/bin/kubelet
+  sudo mv kubernetes/client/bin/kubectl kubernetes/server/bin/kube-proxy kubernetes/server/bin/kubelet /usr/local/bin/
 }
 
 {
