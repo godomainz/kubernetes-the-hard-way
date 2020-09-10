@@ -3,6 +3,11 @@
 Install Go
 
 ```
+wget https://golang.org/dl/go1.15.2.linux-amd64.tar.gz
+sudo tar -C /usr/local -xvzf go1.15.2.linux-amd64.tar.gz
+export GOPATH="${HOME}/go"
+export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
+
 wget https://dl.google.com/go/go1.12.1.linux-amd64.tar.gz
 
 sudo tar -C /usr/local -xzf go1.12.1.linux-amd64.tar.gz
@@ -24,6 +29,7 @@ GO111MODULE=on go install ./kubetest
 
 ```
 K8S_VERSION=$(kubectl version -o json | jq -r '.serverVersion.gitVersion')
+K8S_VERSION=$(kubectl version -o json | grep -oP '(?<="gitVersion": ")[^"]*' | tail -1)
 export KUBERNETES_CONFORMANCE_TEST=y
 export KUBECONFIG="$HOME/.kube/config"
 
