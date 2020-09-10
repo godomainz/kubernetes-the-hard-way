@@ -72,7 +72,7 @@ This is the OLD way
 {
   sudo mkdir -p /var/lib/kubernetes/
 
-  sudo cp ca.crt ca.key kube-apiserver.crt kube-apiserver.key \
+  sudo cp ca.crt ca.key kube-apiserver.crt kube-apiserver.key kube-proxy.crt kube-proxy.key \
     service-account.key service-account.crt \
     etcd-server.key etcd-server.crt \
     encryption-config.yaml /var/lib/kubernetes/
@@ -111,7 +111,7 @@ ExecStart=/usr/local/bin/kube-apiserver \\
   --authorization-mode=Node,RBAC \\
   --bind-address=0.0.0.0 \\
   --client-ca-file=/var/lib/kubernetes/ca.crt \\
-  --enable-admission-plugins=NodeRestriction,ServiceAccount \\
+  --enable-admission-plugins=NodeRestriction,ServiceAccount,PodPreset \\
   --enable-swagger-ui=true \\
   --enable-bootstrap-token-auth=true \\
   --etcd-cafile=/var/lib/kubernetes/ca.crt \\
@@ -123,6 +123,14 @@ ExecStart=/usr/local/bin/kube-apiserver \\
   --kubelet-certificate-authority=/var/lib/kubernetes/ca.crt \\
   --kubelet-client-certificate=/var/lib/kubernetes/kube-apiserver.crt \\
   --kubelet-client-key=/var/lib/kubernetes/kube-apiserver.key \\
+  --requestheader-client-ca-file=/var/lib/kubernetes/kube-proxy.crt \\
+  --requestheader-allowed-names=front-proxy-client \\
+  --requestheader-extra-headers-prefix=X-Remote-Extra- \\
+  --requestheader-group-headers=X-Remote-Group \\
+  --requestheader-username-headers=X-Remote-User \\ 
+  --proxy-client-cert-file=/var/lib/kubernetes/kube-proxy.crt \\ 
+  --proxy-client-key-file=/var/lib/kubernetes/kube-proxy.key \\
+  --enable-aggregator-routing=true \\
   --kubelet-https=true \\
   --runtime-config=api/all=true \\
   --service-account-key-file=/var/lib/kubernetes/service-account.crt \\
@@ -130,6 +138,7 @@ ExecStart=/usr/local/bin/kube-apiserver \\
   --service-node-port-range=30000-32767 \\
   --tls-cert-file=/var/lib/kubernetes/kube-apiserver.crt \\
   --tls-private-key-file=/var/lib/kubernetes/kube-apiserver.key \\
+  --runtime-config=settings.k8s.io/v1alpha1=true \\
   --v=2
 Restart=on-failure
 RestartSec=5
