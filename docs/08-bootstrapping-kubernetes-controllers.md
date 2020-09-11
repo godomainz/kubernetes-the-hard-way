@@ -82,7 +82,7 @@ This is the OLD way
 The instance internal IP address will be used to advertise the API Server to members of the cluster. Retrieve the internal IP address for the current compute instance:
 
 ```
-INTERNAL_IP=$(ip addr show enp33 | grep "inet " | awk '{print $2}' | cut -d / -f 1)
+INTERNAL_IP=$(ip addr show ens33 | grep "inet " | awk '{print $2}' | cut -d / -f 1)
 ```
 
 Verify it is set
@@ -123,6 +123,7 @@ ExecStart=/usr/local/bin/kube-apiserver \\
   --kubelet-certificate-authority=/var/lib/kubernetes/ca.crt \\
   --kubelet-client-certificate=/var/lib/kubernetes/kube-apiserver.crt \\
   --kubelet-client-key=/var/lib/kubernetes/kube-apiserver.key \\
+  --kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname \\
   --requestheader-client-ca-file=/var/lib/kubernetes/kube-proxy.crt \\
   --requestheader-allowed-names=front-proxy-client \\
   --requestheader-extra-headers-prefix=X-Remote-Extra- \\
@@ -267,18 +268,32 @@ openssl genrsa -out ssl.key 2048
 openssl req -new -key ssl.key -subj "/CN=ssl" -out ssl.csr
 openssl x509 -req -in ssl.csr -signkey ssl.key -CAcreateserial  -out ssl.crt -days 1000
 
-create docker-compase.yml
+create docker-compose.yml
 version: "3"
 services:
   nginxproxy:
     image: nginx
     restart: always
     ports:
-     - 6443:443
+     - 6443:80
     volumes:
      - "./nginx.conf:/etc/nginx/nginx.conf"
      - "./ssl.crt:/etc/nginx/certs/ssl.crt"
      - "./ssl.key:/etc/nginx/certs/ssl.key"
+
+---------------------------------------------------------------
+cat > docker-compose.yml <<EOF
+version: "3"
+services:
+  nginxproxy:
+    image: nginx
+    restart: always
+    ports:
+     - 6443:80
+    volumes:
+     - "./nginx.conf:/etc/nginx/nginx.conf"
+EOF
+---------------------------------------------------------------
 
 create nginx.conf
 events {
@@ -310,6 +325,29 @@ http {
 	}
 }
 
+------------------------------------------------------------------------
+
+nginx.conf
+events {
+  multi_accept on;
+  worker_connections  4096;
+}
+http {
+	upstream myproject {
+      least_conn;
+	    server 192.168.111.138:6443;
+	    server 192.168.111.242:6443;
+	}
+	server {
+	    listen 80;
+	    location / {
+	      proxy_pass https://myproject;
+		    error_log /var/log/front_end_http_errors.log;
+	    }
+	 }
+}
+
+------------------------------------------------------------------------
 
 If you don't have docker installed use above config file to configure nginx
 
