@@ -92,7 +92,7 @@ echo $INTERNAL_IP
 ```
 
 Create the `kube-apiserver.service` systemd unit file:
-
+IMPORTANT DO NOT PUT SPACES AFTER \\
 ```
 cat <<EOF | sudo tee /etc/systemd/system/kube-apiserver.service
 [Unit]
@@ -128,8 +128,8 @@ ExecStart=/usr/local/bin/kube-apiserver \\
   --requestheader-allowed-names=front-proxy-client \\
   --requestheader-extra-headers-prefix=X-Remote-Extra- \\
   --requestheader-group-headers=X-Remote-Group \\
-  --requestheader-username-headers=X-Remote-User \\ 
-  --proxy-client-cert-file=/var/lib/kubernetes/kube-proxy.crt \\ 
+  --requestheader-username-headers=X-Remote-User \\
+  --proxy-client-cert-file=/var/lib/kubernetes/kube-proxy.crt \\
   --proxy-client-key-file=/var/lib/kubernetes/kube-proxy.key \\
   --enable-aggregator-routing=true \\
   --kubelet-https=true \\
@@ -298,32 +298,33 @@ EOF
 create nginx.conf
 events {
   multi_accept on;
-  worker_connections  4096;  ## Default: 1024
+  worker_connections  4096;
 }
 http {
 	upstream myproject {
-	    server 192.168.111.138:6443;
-	    server 192.168.111.242:6443;
+            least_conn;
+	    server 192.168.111.246:6443;
+	    server 192.168.111.247:6443;
 	}
-
 	server {
-	    listen 80;
+            listen 6443 ssl;
+            ssl_certificate     /home/akila/nginx/ca.crt;
+    	    ssl_certificate_key /home/akila/nginx/ca.key;
+            ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;
+	   
 	    location / {
-	      proxy_pass https://myproject;
-		  error_log /var/log/front_end_http_errors.log;
+               proxy_redirect          off;
+               proxy_http_version      1.1;
+               proxy_set_header Host   $host;
+               proxy_set_header        X-Real-IP       $remote_addr;
+               proxy_set_header        X-Forwarded-For $proxy_add_x_forwarded_for;
+               proxy_set_header        Upgrade $http_upgrade;
+               proxy_set_header        Connection "upgrade";
+	       proxy_pass              https://myproject;
 	    }
-	 }
-
-	 server {
-		listen 443 ssl;
-		ssl_certificate /etc/nginx/certs/ssl.crt;
-		ssl_certificate_key /etc/nginx/certs/ssl.key;
-		location / {
-			proxy_pass https://myproject;
-			error_log /var/log/front_end_ssl_errors.log;
-		}
 	}
 }
+
 
 ------------------------------------------------------------------------
 
@@ -334,18 +335,29 @@ events {
 }
 http {
 	upstream myproject {
-      least_conn;
-	    server 192.168.111.138:6443;
-	    server 192.168.111.242:6443;
+            least_conn;
+	    server 192.168.111.246:6443;
+	    server 192.168.111.247:6443;
 	}
 	server {
-	    listen 80;
+            listen 6443 ssl;
+            ssl_certificate     /home/akila/nginx/ca.crt;
+    	      ssl_certificate_key /home/akila/nginx/ca.key;
+            ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;
+	   
 	    location / {
-	      proxy_pass https://myproject;
-		    error_log /var/log/front_end_http_errors.log;
+               proxy_redirect          off;
+               proxy_http_version      1.1;
+               proxy_set_header Host   $host;
+               proxy_set_header        X-Real-IP       $remote_addr;
+               proxy_set_header        X-Forwarded-For $proxy_add_x_forwarded_for;
+               proxy_set_header        Upgrade $http_upgrade;
+               proxy_set_header        Connection "upgrade";
+	       proxy_pass              https://myproject;
 	    }
-	 }
+	}
 }
+
 
 ------------------------------------------------------------------------
 
