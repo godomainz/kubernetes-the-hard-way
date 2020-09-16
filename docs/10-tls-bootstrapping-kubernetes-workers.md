@@ -42,8 +42,8 @@ Copy the ca certificate to the worker node:
 
 ```
 {
-  ssh worker-2 "mkdir -p ~/kubernetes_config"
-  scp ca.crt worker-2:~/kubernetes_config
+  ssh worker-1 "mkdir -p ~/kubernetes_config"
+  scp ca.crt worker-1:~/kubernetes_config
 }
 
 ```
@@ -312,6 +312,7 @@ clusterDNS:
   - "10.96.0.10"
 resolvConf: "/run/systemd/resolve/resolv.conf"
 runtimeRequestTimeout: "15m"
+readOnlyPort: 10255
 EOF
 ```
 
@@ -340,6 +341,7 @@ ExecStart=/usr/local/bin/kubelet \\
   --rotate-server-certificates=true \\
   --network-plugin=cni \\
   --register-node=true \\
+  --allow-privileged=true \\
   --v=2
 Restart=on-failure
 RestartSec=5
@@ -407,7 +409,7 @@ EOF
 Check the status of the service
 sudo service kubelet status
 journalctl -u kubelet -f
-
+sudo netstat -ap | grep -i "listen" | grep "kubelet"
 
 > Remember to run the above commands on worker node: `worker-2`
 

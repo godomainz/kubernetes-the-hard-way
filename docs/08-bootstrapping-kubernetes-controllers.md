@@ -140,6 +140,7 @@ ExecStart=/usr/local/bin/kube-apiserver \\
   --tls-cert-file=/var/lib/kubernetes/kube-apiserver.crt \\
   --tls-private-key-file=/var/lib/kubernetes/kube-apiserver.key \\
   --runtime-config=settings.k8s.io/v1alpha1=true \\
+  --allow-privileged=true \\
   --v=2
 Restart=on-failure
 RestartSec=5
@@ -368,11 +369,16 @@ If you don't have docker installed use above config file to configure nginx
 loadbalancer# sudo apt-get update && sudo apt-get install -y haproxy
 
 ```
-
-```
+------------------------------------------------------------
 loadbalancer# cat <<EOF | sudo tee /etc/haproxy/haproxy.cfg 
 frontend kubernetes
     bind 192.168.111.245:6443
+----------------------------------------------------------
+
+```
+loadbalancer# cat <<EOF | sudo tee haproxy.cfg 
+frontend kubernetes
+    bind 0.0.0.0:6443
     option tcplog
     mode tcp
     default_backend kubernetes-master-nodes
@@ -389,6 +395,21 @@ EOF
 ```
 loadbalancer# sudo service haproxy restart
 ```
+
+
+---------------------------------------------------------------
+cat > docker-compose.yml <<EOF
+version: "3"
+services:
+  nginxproxy:
+    image: haproxy
+    restart: always
+    ports:
+     - 6443:6443
+    volumes:
+     - "./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg"
+EOF
+---------------------------------------------------------------
 
 ### Verification
 
