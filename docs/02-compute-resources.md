@@ -35,10 +35,83 @@ This does the below:
 - Add's a DNS entry to each of the nodes to access internet
     > DNS: 8.8.8.8
 
+- install vim
+sudo apt-get install vim -y
+
+- Change the hostname
+ sudo hostnamectl set-hostname loadbalancer
+- Edit the /etc/hosts file with hostname
+sudo vim /etc/hosts
+
+
+- sudo apt install -y jq
+- sudo apt install net-tools -y
+- sudo apt install htop -y
+- sudo apt install git -y
+- sudo apt update && sudo apt install openssh-server -y
+- add your public key to .ssh/authorized_keys
+vim .ssh/authorized_keys
+
+- ssh/config
+cat > ~/.ssh/config <<EOF
+Host *
+    ServerAliveInterval 60
+
+Host jenkins
+ User root
+ Hostname jenkins.oneit.com.au
+ IdentityFile ~/.ssh/id_rsa
+ Port 40022
+
+Host prod-oneit-files.oneit.com.au
+ User jenkins
+ Hostname prod-oneit-files.oneit.com.au
+ Port 40022
+ ProxyCommand ssh -o 'ForwardAgent yes' jenkins 'ssh-add && nc %h %p'
+EOF
+
+- add your authorized_keys,  id_rsa,  id_rsa.pub
+cat > ~/.ssh/authorized_keys <<EOF
+blah blah akila@ubuntu
+EOF
+
+cat > ~/.ssh/id_rsa <<EOF
+-----BEGIN RSA PRIVATE KEY-----
+blah blah
+-----END RSA PRIVATE KEY-----
+EOF
+
+cat > ~/.ssh/id_rsa.pub <<EOF
+blah blah akila@ubuntu
+EOF
+
+
+
 - Install's Docker on Worker nodes
+
 - Runs the below command on all nodes to allow for network forwarding in IP Tables.
   This is required for kubernetes networking to function correctly.
-    > sysctl net.bridge.bridge-nf-call-iptables=1
+    > sudo sysctl net.bridge.bridge-nf-call-iptables=1
+
+- trun off swap
+cat > ~/swapoff.sh <<EOF
+#!/bin/bash
+swapoff -a
+EOF
+chmod +x ~/swapoff.sh
+
+cat <<EOF | sudo tee /etc/systemd/system/swapoff.service
+[Unit]
+Description=swapoff script
+
+[Service]
+ExecStart=/home/akila/swapoff.sh
+
+[Install]
+WantedBy=multi-user.target
+EOF
+sudo service swapoff start
+
 
 
 ## SSH to the nodes
