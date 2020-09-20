@@ -349,6 +349,7 @@ ExecStart=/usr/local/bin/kubelet \\
   --network-plugin=cni \\
   --register-node=true \\
   --allow-privileged=true \\
+  --cni-conf-dir=/etc/cni/net.d \\
   --v=2
 Restart=on-failure
 RestartSec=5
