@@ -57,17 +57,19 @@ The instance internal IP address will be used to serve client requests and commu
 
 ```
 INTERNAL_IP=$(ip addr show ens33 | grep "inet " | awk '{print $2}' | cut -d / -f 1)
+echo $INTERNAL_IP
 ```
 
 Each etcd member must have a unique name within an etcd cluster. Set the etcd name to match the hostname of the current compute instance:
 
 ```
 ETCD_NAME=$(hostname -s)
+echo $ETCD_NAME
 ```
 
 Create the `etcd.service` systemd unit file:
 this line --> --initial-cluster master1=https://192.168.111.138:2380,master2=https:/192.168.111.242:2380
-master1, masteR2 means host names of the master nodes
+master1, masteR2 means host names of the master nodes (etcd nodes actually)
 192.168.111.138 , 192.168.111.242 are IP addresses of master nodes
 ```
 cat <<EOF | sudo tee /etc/systemd/system/etcd.service
@@ -91,7 +93,7 @@ ExecStart=/usr/local/bin/etcd \\
   --listen-client-urls https://${INTERNAL_IP}:2379,https://127.0.0.1:2379 \\
   --advertise-client-urls https://${INTERNAL_IP}:2379 \\
   --initial-cluster-token etcd-cluster-0 \\
-  --initial-cluster master-1=https://192.168.111.246:2380,master-2=https://192.168.111.247:2380 \\
+  --initial-cluster master-1=https://192.168.111.134:2380,master-2=https://192.168.111.135:2380 \\
   --initial-cluster-state new \\
   --data-dir=/var/lib/etcd
 Restart=on-failure
@@ -124,7 +126,7 @@ List the etcd cluster members:
 
 ```
 sudo ETCDCTL_API=3 etcdctl member list \
-  --endpoints=https://192.168.111.246:2379 \
+  --endpoints=https://192.168.111.253:2379 \
   --cacert=/etc/etcd/ca.crt \
   --cert=/etc/etcd/etcd-server.crt \
   --key=/etc/etcd/etcd-server.key

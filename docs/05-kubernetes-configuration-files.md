@@ -2,6 +2,24 @@
 
 In this lab you will generate [Kubernetes configuration files](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/), also known as kubeconfigs, which enable Kubernetes clients to locate and authenticate to the Kubernetes API Servers.
 
+
+## Download client tools
+
+{
+  cd ~
+  mkdir -p kubernetes_config
+  cd kubernetes_config
+  wget -q --show-progress --https-only --timestamping https://github.com/kubernetes/kubernetes/releases/download/v1.18.8/kubernetes.tar.gz
+  tar -xvf kubernetes.tar.gz
+  echo Y |  ./kubernetes/cluster/get-kube-binaries.sh
+  tar -xvf kubernetes/server/kubernetes-server-linux-amd64.tar.gz
+}
+
+{
+  chmod +x kubernetes/server/bin/kube-apiserver kubernetes/server/bin/kube-controller-manager kubernetes/server/bin/kube-scheduler kubernetes/server/bin/kubectl
+  sudo mv kubernetes/server/bin/kube-apiserver kubernetes/server/bin/kube-controller-manager kubernetes/server/bin/kube-scheduler kubernetes/server/bin/kubectl /usr/local/bin/
+}
+
 ## Client Authentication Configs
 
 In this section you will generate kubeconfig files for the `controller manager`, `kube-proxy`, `scheduler` clients and the `admin` user.
@@ -11,7 +29,7 @@ In this section you will generate kubeconfig files for the `controller manager`,
 Each kubeconfig requires a Kubernetes API Server to connect to. To support high availability the IP address assigned to the load balancer will be used. In our case it is `192.168.5.30`
 
 ```
-LOADBALANCER_ADDRESS=192.168.111.245
+LOADBALANCER_ADDRESS=192.168.111.133
 ```
 
 ### The kube-proxy Kubernetes Configuration File

@@ -8,6 +8,7 @@ Deploy the `coredns` cluster add-on:
 
 ```
 kubectl apply -f https://raw.githubusercontent.com/godomainz/kubernetes-the-hard-way/master/docs/coredns.yaml
+<!-- kubectl delete -f https://raw.githubusercontent.com/godomainz/kubernetes-the-hard-way/master/docs/coredns.yaml -->
 ```
 
 > output
@@ -24,7 +25,7 @@ service/kube-dns created
 List the pods created by the `kube-dns` deployment:
 
 ```
-kubectl get pods -l k8s-app=kube-dns -n kube-system
+kubectl get pods -l k8s-app=kube-dns -n kube-system -o wide
 ```
 
 > output

@@ -16,7 +16,10 @@ In this section you will provision a Certificate Authority that can be used to g
 Create a CA certificate, then generate a Certificate Signing Request and use it to create a private key:
 
 
+
 ```
+mkdir -p ~/kubernetes_config && cd ~/kubernetes_config
+
 # Create private key for CA
 openssl genrsa -out ca.key 2048
 
@@ -82,9 +85,12 @@ For now let's just focus on the control plane components.
 Generate the `kube-controller-manager` client certificate and private key:
 
 ```
-openssl genrsa -out kube-controller-manager.key 2048
-openssl req -new -key kube-controller-manager.key -subj "/CN=system:kube-controller-manager" -out kube-controller-manager.csr
-openssl x509 -req -in kube-controller-manager.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out kube-controller-manager.crt -days 1000
+{
+  openssl genrsa -out kube-controller-manager.key 2048
+  openssl req -new -key kube-controller-manager.key -subj "/CN=system:kube-controller-manager" -out kube-controller-manager.csr
+  openssl x509 -req -in kube-controller-manager.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out kube-controller-manager.crt -days 1000
+}
+
 ```
 
 Results:
@@ -101,9 +107,12 @@ Generate the `kube-proxy` client certificate and private key:
 
 
 ```
-openssl genrsa -out kube-proxy.key 2048
-openssl req -new -key kube-proxy.key -subj "/CN=system:kube-proxy" -out kube-proxy.csr
-openssl x509 -req -in kube-proxy.csr -CA ca.crt -CAkey ca.key -CAcreateserial  -out kube-proxy.crt -days 1000
+{
+  openssl genrsa -out kube-proxy.key 2048
+  openssl req -new -key kube-proxy.key -subj "/CN=system:kube-proxy" -out kube-proxy.csr
+  openssl x509 -req -in kube-proxy.csr -CA ca.crt -CAkey ca.key -CAcreateserial  -out kube-proxy.crt -days 1000
+}
+
 ```
 
 Results:
@@ -120,9 +129,12 @@ Generate the `kube-scheduler` client certificate and private key:
 
 
 ```
-openssl genrsa -out kube-scheduler.key 2048
-openssl req -new -key kube-scheduler.key -subj "/CN=system:kube-scheduler" -out kube-scheduler.csr
-openssl x509 -req -in kube-scheduler.csr -CA ca.crt -CAkey ca.key -CAcreateserial  -out kube-scheduler.crt -days 1000
+{
+  openssl genrsa -out kube-scheduler.key 2048
+  openssl req -new -key kube-scheduler.key -subj "/CN=system:kube-scheduler" -out kube-scheduler.csr
+  openssl x509 -req -in kube-scheduler.csr -CA ca.crt -CAkey ca.key -CAcreateserial  -out kube-scheduler.crt -days 1000
+}
+
 ```
 
 Results:
@@ -155,11 +167,11 @@ DNS.2 = kubernetes.default
 DNS.3 = kubernetes.default.svc
 DNS.4 = kubernetes.default.svc.cluster.local
 IP.1 = 10.96.0.1
-IP.2 = 192.168.111.245
-IP.3 = 192.168.111.246
-IP.4 = 192.168.111.247
-IP.5 = 192.168.111.250
-IP.6 = 192.168.111.249
+IP.2 = 192.168.111.133
+IP.3 = 192.168.111.134
+IP.4 = 192.168.111.135
+IP.5 = 192.168.111.136
+IP.6 = 192.168.111.137
 IP.7 = 127.0.0.1
 EOF
 ```
@@ -167,9 +179,12 @@ EOF
 Generates certs for kube-apiserver
 
 ```
-openssl genrsa -out kube-apiserver.key 2048
-openssl req -new -key kube-apiserver.key -subj "/CN=kube-apiserver" -out kube-apiserver.csr -config openssl.cnf
-openssl x509 -req -in kube-apiserver.csr -CA ca.crt -CAkey ca.key -CAcreateserial  -out kube-apiserver.crt -extensions v3_req -extfile openssl.cnf -days 1000
+{
+  openssl genrsa -out kube-apiserver.key 2048
+  openssl req -new -key kube-apiserver.key -subj "/CN=kube-apiserver" -out kube-apiserver.csr -config openssl.cnf
+  openssl x509 -req -in kube-apiserver.csr -CA ca.crt -CAkey ca.key -CAcreateserial  -out kube-apiserver.crt -extensions v3_req -extfile openssl.cnf -days 1000
+}
+
 ```
 
 Results:
@@ -196,8 +211,8 @@ basicConstraints = CA:FALSE
 keyUsage = nonRepudiation, digitalSignature, keyEncipherment
 subjectAltName = @alt_names
 [alt_names]
-IP.1 = 192.168.111.246
-IP.2 = 192.168.111.247
+IP.1 = 192.168.111.134
+IP.2 = 192.168.111.135
 IP.3 = 127.0.0.1
 EOF
 ```
@@ -205,9 +220,12 @@ EOF
 Generates certs for ETCD
 
 ```
-openssl genrsa -out etcd-server.key 2048
-openssl req -new -key etcd-server.key -subj "/CN=etcd-server" -out etcd-server.csr -config openssl-etcd.cnf
-openssl x509 -req -in etcd-server.csr -CA ca.crt -CAkey ca.key -CAcreateserial  -out etcd-server.crt -extensions v3_req -extfile openssl-etcd.cnf -days 1000
+{
+  openssl genrsa -out etcd-server.key 2048
+  openssl req -new -key etcd-server.key -subj "/CN=etcd-server" -out etcd-server.csr -config openssl-etcd.cnf
+  openssl x509 -req -in etcd-server.csr -CA ca.crt -CAkey ca.key -CAcreateserial  -out etcd-server.crt -extensions v3_req -extfile openssl-etcd.cnf -days 1000
+}
+
 ```
 
 Results:
@@ -224,9 +242,12 @@ The Kubernetes Controller Manager leverages a key pair to generate and sign serv
 Generate the `service-account` certificate and private key:
 
 ```
-openssl genrsa -out service-account.key 2048
-openssl req -new -key service-account.key -subj "/CN=service-accounts" -out service-account.csr
-openssl x509 -req -in service-account.csr -CA ca.crt -CAkey ca.key -CAcreateserial  -out service-account.crt -days 1000
+{
+  openssl genrsa -out service-account.key 2048
+  openssl req -new -key service-account.key -subj "/CN=service-accounts" -out service-account.csr
+  openssl x509 -req -in service-account.csr -CA ca.crt -CAkey ca.key -CAcreateserial  -out service-account.crt -days 1000
+}
+
 ```
 
 Results:
@@ -248,6 +269,7 @@ for instance in master-1 master-2; do
     kube-scheduler.crt kube-scheduler.key \
     service-account.key service-account.crt \
     etcd-server.key etcd-server.crt \
+    admin.crt admin.key \
     ${instance}:~/kubernetes_config
 done
 ```

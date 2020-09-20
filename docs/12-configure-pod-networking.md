@@ -30,25 +30,38 @@ Deploy weave network. Run only once on the `master` node.
     sudo ufw allow from any to any port 6784 proto udp
 }
 
-sudo sysctl net.ipv4.conf.all.forwarding=1
-echo "net.ipv4.conf.all.forwarding=1" | sudo tee -a /etc/sysctl.conf
+{
+    sudo ufw allow 6783/tcp
+    sudo ufw allow 6783/udp
+    sudo ufw allow 6784/udp
+}
+
+http://www.vassox.com/infrastructure/networking/enable-ip-forwarding-routing-on-ubuntu-18-04/
+https://openvpn.net/faq/what-is-and-how-do-i-enable-ip-forwarding-on-linux/
+https://askubuntu.com/questions/1050816/ubuntu-18-04-as-a-router
+sudo sysctl net.ipv4.ip_forward=1 (do this command on all nodes)
+echo "net.ipv4.ip_forward=1" | sudo tee -a /etc/sysctl.conf
+sudo sysctl -p
+
+https://www.weave.works/docs/net/latest/kubernetes/
 sudo curl -L git.io/weave -o /usr/local/bin/weave
 sudo chmod a+x /usr/local/bin/weave
 weave setup
+weave launch 192.168.111.136
 
 `kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"`
 
 Weave uses POD CIDR of `10.32.0.0/12` by default.
 
 IF you want to change the POD CIDR use this command
-kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')&env.IPALLOC_RANGE=10.200.0.0/16"
+kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')&env.IPALLOC_RANGE=10.32.0.0/16"
 
 ## Verification
 
 List the registered Kubernetes nodes from the master node:
 
 ```
-master-1$ kubectl get pods -n kube-system --watch
+master-1$ kubectl get pods -n kube-system -o wide --watch
 ```
 
 > output

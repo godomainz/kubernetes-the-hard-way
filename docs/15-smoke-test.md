@@ -63,7 +63,7 @@ kubectl create deployment nginx --image=nginx
 List the pod created by the `nginx` deployment:
 
 ```
-kubectl get pods -l app=nginx
+kubectl get pods -l app=nginx -o wide --watch
 ```
 
 > output

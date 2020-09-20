@@ -29,7 +29,7 @@ This is the NEW way
   cd ~
   mkdir -p kubernetes_config
   cd kubernetes_config
-  wget -q --show-progress --https-only --timestamping https://github.com/kubernetes/kubernetes/releases/download/v1.19.0/kubernetes.tar.gz
+  wget -q --show-progress --https-only --timestamping https://github.com/kubernetes/kubernetes/releases/download/v1.18.8/kubernetes.tar.gz
   tar -xvf kubernetes.tar.gz
   echo Y |  ./kubernetes/cluster/get-kube-binaries.sh
   tar -xvf kubernetes/server/kubernetes-server-linux-amd64.tar.gz
@@ -94,6 +94,8 @@ echo $INTERNAL_IP
 Create the `kube-apiserver.service` systemd unit file:
 IMPORTANT DO NOT PUT SPACES AFTER \\
 ```
+
+
 cat <<EOF | sudo tee /etc/systemd/system/kube-apiserver.service
 [Unit]
 Description=Kubernetes API Server
@@ -102,7 +104,6 @@ Documentation=https://github.com/kubernetes/kubernetes
 [Service]
 ExecStart=/usr/local/bin/kube-apiserver \\
   --advertise-address=${INTERNAL_IP} \\
-  --allow-privileged=true \\
   --apiserver-count=3 \\
   --audit-log-maxage=30 \\
   --audit-log-maxbackup=3 \\
@@ -117,7 +118,7 @@ ExecStart=/usr/local/bin/kube-apiserver \\
   --etcd-cafile=/var/lib/kubernetes/ca.crt \\
   --etcd-certfile=/var/lib/kubernetes/etcd-server.crt \\
   --etcd-keyfile=/var/lib/kubernetes/etcd-server.key \\
-  --etcd-servers=https://192.168.111.246:2379,https://192.168.111.247:2379 \\
+  --etcd-servers=https://192.168.111.134:2379,https://192.168.111.135:2379 \\
   --event-ttl=1h \\
   --encryption-provider-config=/var/lib/kubernetes/encryption-config.yaml \\
   --kubelet-certificate-authority=/var/lib/kubernetes/ca.crt \\
@@ -387,8 +388,8 @@ backend kubernetes-master-nodes
     mode tcp
     balance roundrobin
     option tcp-check
-    server master1 192.168.111.246:6443 check fall 3 rise 2
-    server master2 192.168.111.247:6443 check fall 3 rise 2
+    server master1 192.168.111.134:6443 check fall 3 rise 2
+    server master2 192.168.111.135:6443 check fall 3 rise 2
 EOF
 ```
 
@@ -401,7 +402,7 @@ loadbalancer# sudo service haproxy restart
 cat > docker-compose.yml <<EOF
 version: "3"
 services:
-  nginxproxy:
+  haproxy:
     image: haproxy
     restart: always
     ports:
@@ -416,7 +417,7 @@ EOF
 Make a HTTP request for the Kubernetes version info:
 
 ```
-curl  https://192.168.111.245:6443/version -k
+curl  https://192.168.111.133:6443/version -k
 ```
 
 > output

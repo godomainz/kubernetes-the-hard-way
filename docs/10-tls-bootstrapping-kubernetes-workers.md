@@ -41,9 +41,14 @@ run this command on master node : ps aux | grep kube-controller-manager
 Copy the ca certificate to the worker node:
 
 ```
+for instance in worker-1 worker-2; do
+  ssh ${instance} "mkdir -p ~/kubernetes_config"
+  scp ca.crt ${instance}:~/kubernetes_config
+done
+
 {
-  ssh worker-1 "mkdir -p ~/kubernetes_config"
-  scp ca.crt worker-1:~/kubernetes_config
+  ssh worker-2 "mkdir -p ~/kubernetes_config"
+  scp ca.crt worker-2:~/kubernetes_config
 }
 
 ```
@@ -56,7 +61,7 @@ Copy the ca certificate to the worker node:
 
 This is the NEW way
 {
-  wget -q --show-progress --https-only --timestamping https://github.com/kubernetes/kubernetes/releases/download/v1.19.0/kubernetes.tar.gz
+  wget -q --show-progress --https-only --timestamping https://github.com/kubernetes/kubernetes/releases/download/v1.18.8/kubernetes.tar.gz
   tar -xvf kubernetes.tar.gz
   echo "Y" | ./kubernetes/cluster/get-kube-binaries.sh
   tar -xvf kubernetes/server/kubernetes-server-linux-amd64.tar.gz
@@ -255,7 +260,7 @@ This is to be done on the `worker-2` node.
 
 ```
 {
-  sudo kubectl config --kubeconfig=/var/lib/kubelet/bootstrap-kubeconfig set-cluster bootstrap --server='https://192.168.111.245:6443' --certificate-authority=/var/lib/kubernetes/ca.crt
+  sudo kubectl config --kubeconfig=/var/lib/kubelet/bootstrap-kubeconfig set-cluster bootstrap --server='https://192.168.111.133:6443' --certificate-authority=/var/lib/kubernetes/ca.crt
   sudo kubectl config --kubeconfig=/var/lib/kubelet/bootstrap-kubeconfig set-credentials kubelet-bootstrap --token=07401b.f395accd246ae52d
   sudo kubectl config --kubeconfig=/var/lib/kubelet/bootstrap-kubeconfig set-context bootstrap --user=kubelet-bootstrap --cluster=bootstrap
   sudo kubectl config --kubeconfig=/var/lib/kubelet/bootstrap-kubeconfig use-context bootstrap
@@ -323,6 +328,8 @@ EOF
 Create the `kubelet.service` systemd unit file:
 
 ```
+--allow-privileged=true NOT supported for kulet 1.18.8
+
 cat <<EOF | sudo tee /etc/systemd/system/kubelet.service
 [Unit]
 Description=Kubernetes Kubelet
@@ -409,7 +416,7 @@ EOF
 Check the status of the service
 sudo service kubelet status
 journalctl -u kubelet -f
-sudo netstat -ap | grep -i "listen" | grep "kubelet"
+sudo netstat -ap | grep -i "listen" | grep "kubelet" (make sure there is a process on 10255)
 
 > Remember to run the above commands on worker node: `worker-2`
 

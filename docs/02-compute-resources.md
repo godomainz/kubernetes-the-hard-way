@@ -44,13 +44,13 @@ sudo apt-get install vim -y
 sudo vim /etc/hosts
 
 
-- sudo apt install -y jq
-- sudo apt install net-tools -y
-- sudo apt install htop -y
-- sudo apt install git -y
-- sudo apt update && sudo apt install openssh-server -y
+- sudo apt update && sudo apt install -y jq && sudo apt install net-tools -y && sudo apt install htop -y && sudo apt install git -y && sudo apt install openssh-server -y
+
 - add your public key to .ssh/authorized_keys
-vim .ssh/authorized_keys
+cat > ~/.ssh/authorized_keys <<EOF
+blah blah
+EOF
+
 
 - ssh/config
 cat > ~/.ssh/config <<EOF
@@ -77,7 +77,31 @@ EOF
 
 cat > ~/.ssh/id_rsa <<EOF
 -----BEGIN RSA PRIVATE KEY-----
-blah blah
+MIIEpAIBAAKCAQEA4JCrDKhnU93VfzjYaSE8MQtDm5cRYXfNV6k/ioHxkIvlYErw
+EOUC39qtK28/rzY3ejmWVW0w2Uhp0wwczZaOM8bxJ2bIsL8d8DR5XlLrkKHhnbzr
+JjJsUe/MYk2+MLJvsgI/temY5qTTjZ+3bckWrmidszeU+EchtPhuw6gYwPnxmIZr
+BpH5J6c9fVmt2INYoRjVeRoRFlbF1EGuIYvV5extbwxeNQnL1JVX3iFlLwDchRIZ
+Hsz8d+K3tNRo/jhV9IfHPpyQHQYUWBJ1lIqQrWHKi7mGXvVqwrETEQvPdgSnVp0t
+sBcsc7Nhseln+g2C9s8Bk12HaZoF/RjcUhz4IQIDAQABAoIBAAvtgzhb5Ykd2k40
+ncIPwtu0BnZIMuMjcuO6GKbpugP8ekWAFXpAP8PWIKaS9SYAUjgKwQJul06jOwO7
+u/frjEgRxBNcsUI6FIQCtYOeEecPwiUXuMHBoeFERG3gRT7e63HgDrRB4R43GQmH
+tz18ldjTs7SmOiJp3M949qEr14zAYGuKlLcyRqFzeLqr6xK+6rDvUGvJxRL/Lb5U
+IbUMzFayin3WqywUSVAKpXDxcRDxts+5ylP/c9uI1JqDrcLYiTtpKu+DL0NagTqP
+vEe0kjcgCR+cFhJTOjhkhpMpEd1q55KiZuK8s53qTQR+bjx9NKzxa3OTYYi8t8fs
+pa1niAECgYEA9Tr2llTKoaLdUkmKcVmdWNicXBmha47wk7qHGnEKwfkD7Mpsb6+t
+SSqvodSzUfWovtWOEb1+QVWDD8/2FqnXWZvQyJY/mpQ6zrTSzItVOty4PzQdJpmW
+Bz24pY7wYblQB2Af/gpItu+/kROePdHg2VMwoSKnzJUzlycS8HgLCsECgYEA6m1f
+kX5MworinZreLyLAPWwd8kTC7ylk0UgknzjjOln638dTJyq5SqyMP5c6TP/sirdX
+Kgi0mPAq16vHbgQyNQ0oXwV1ZD/Ip7zq4L+aiPL87DkmJFGYatP5KmMsDBxmmO/M
+bR5fT5iM3GZxNK3qPfZrh7ZLAxzk4yHjF3VgJWECgYEAjb3e+VVZKcPxGLbZBls9
+zzSka7eEzZ54/2o43Nep2CQOWLdHpeZsynWZvngqjZzoRCU7UJWufCTo9CLHoqHY
+jzq4mrf9W2OB+igaD5AZW0RoWl/M2Zq8VMMgDtFnr5Rk5V5yH2viS5qXp0snk6PT
+ysmCuiBFzMIQZ7V2BPfdqgECgYEAjsqGLsoemVUdieBeO5nQPNmROBOYJTMyfKOT
+4wQ0rENIo2v3A2Frscd+OfG0ilhMzYW1ax4YWxvXDL1OYX3e0x+rmo1pnuGXKEzT
+SIiM6aQQWRbKW87zpwZsu9viZZIbEEboXwLkDUifbFRd2jeg+ZMSlnx8Hm5IIO1w
+NMbDBKECgYAi8F3Us98inbTRAmgL4K28y5PYVOdyoCVSVGrtQhoZ48QYSHLCCn2W
+6trAgDQTJ6oMmijCOlh6d7xqPcZt6oP5J8uAv2CPPuF+JN5vIidiwa2NzZlLfGxn
+GeeC4B3tipji966mF6i9Aalhiyp8aT/2YJqDT5/HTu/IYelqDqMp3A==
 -----END RSA PRIVATE KEY-----
 EOF
 
@@ -86,19 +110,25 @@ blah blah akila@ubuntu
 EOF
 
 
-
-- Install's Docker on Worker nodes
-
 - Runs the below command on all nodes to allow for network forwarding in IP Tables.
   This is required for kubernetes networking to function correctly.
     > sudo sysctl net.bridge.bridge-nf-call-iptables=1
+sudo modprobe br_netfilter && sudo sysctl -p /etc/sysctl.conf && sudo sysctl net.bridge.bridge-nf-call-iptables=1
 
 - trun off swap
 cat > ~/swapoff.sh <<EOF
 #!/bin/bash
 swapoff -a
+if [[ "${?}" -ne 0 ]]
+then
+  echo 'The command swapoff -a did not execute successfully.'
+  exit 1
+fi
+echo 'The command swapoff -a did execute successfully.'
+exit 0
 EOF
 chmod +x ~/swapoff.sh
+
 
 cat <<EOF | sudo tee /etc/systemd/system/swapoff.service
 [Unit]
@@ -110,7 +140,30 @@ ExecStart=/home/akila/swapoff.sh
 [Install]
 WantedBy=multi-user.target
 EOF
-sudo service swapoff start
+
+
+{
+  sudo systemctl enable --now
+  sudo service swapoff start
+}
+
+sudo swapon --show
+
+- Install's Docker on Worker nodes
+
+- Enable ip forwarding
+{
+    sudo ufw allow 6783/tcp
+    sudo ufw allow 6783/udp
+    sudo ufw allow 6784/udp
+}
+
+{
+  sudo sysctl net.ipv4.ip_forward=1
+  echo "net.ipv4.ip_forward=1" | sudo tee -a /etc/sysctl.conf
+  sudo sysctl -p
+}
+
 
 
 
