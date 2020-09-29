@@ -29,10 +29,11 @@ This is the NEW way
   cd ~
   mkdir -p kubernetes_config
   cd kubernetes_config
-  wget -q --show-progress --https-only --timestamping https://github.com/kubernetes/kubernetes/releases/download/v1.18.8/kubernetes.tar.gz
-  tar -xvf kubernetes.tar.gz
-  echo Y |  ./kubernetes/cluster/get-kube-binaries.sh
-  tar -xvf kubernetes/server/kubernetes-server-linux-amd64.tar.gz
+  
+  curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.19.2/bin/linux/amd64/kube-apiserver
+  curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.19.2/bin/linux/amd64/kube-controller-manager
+  curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.19.2/bin/linux/amd64/kube-scheduler
+  curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.19.2/bin/linux/amd64/kubectl
 }
 
 
@@ -54,8 +55,8 @@ Install the Kubernetes binaries:
 ```
 This is the NEW way
 {
-  chmod +x kubernetes/server/bin/kube-apiserver kubernetes/server/bin/kube-controller-manager kubernetes/server/bin/kube-scheduler kubernetes/server/bin/kubectl
-  sudo mv kubernetes/server/bin/kube-apiserver kubernetes/server/bin/kube-controller-manager kubernetes/server/bin/kube-scheduler kubernetes/server/bin/kubectl /usr/local/bin/
+  chmod +x kube-apiserver kube-controller-manager kube-scheduler kubectl
+  sudo mv kube-apiserver kube-controller-manager kube-scheduler kubectl /usr/local/bin/
 }
 
 
@@ -377,6 +378,8 @@ frontend kubernetes
 ----------------------------------------------------------
 
 ```
+mkdir -p ~/haproxy & cd ~/haproxy
+
 loadbalancer# cat <<EOF | sudo tee haproxy.cfg 
 frontend kubernetes
     bind 0.0.0.0:6443
@@ -410,6 +413,7 @@ services:
     volumes:
      - "./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg"
 EOF
+docker-compose down --remove-orphans && docker-compose up -d
 ---------------------------------------------------------------
 
 ### Verification

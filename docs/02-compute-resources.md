@@ -143,7 +143,7 @@ EOF
 
 
 {
-  sudo systemctl enable --now
+  sudo systemctl enable swapoff --now
   sudo service swapoff start
 }
 
@@ -153,6 +153,7 @@ sudo swapon --show
 
 - Enable ip forwarding
 {
+    sudo ufw allow 443/tcp
     sudo ufw allow 6783/tcp
     sudo ufw allow 6783/udp
     sudo ufw allow 6784/udp

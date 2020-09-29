@@ -39,15 +39,10 @@ Do wthis on a master node
   cd ~
   mkdir -p kubernetes_config
   cd kubernetes_config
-  wget -q --show-progress --https-only --timestamping https://github.com/kubernetes/kubernetes/releases/download/v1.18.8/kubernetes.tar.gz
-  tar -xvf kubernetes.tar.gz
-  echo Y |  ./kubernetes/cluster/get-kube-binaries.sh
-  tar -xvf kubernetes/server/kubernetes-server-linux-amd64.tar.gz
-}
-
-{
-  chmod +x kubernetes/server/bin/kube-apiserver kubernetes/server/bin/kube-controller-manager kubernetes/server/bin/kube-scheduler kubernetes/server/bin/kubectl
-  sudo mv kubernetes/server/bin/kube-apiserver kubernetes/server/bin/kube-controller-manager kubernetes/server/bin/kube-scheduler kubernetes/server/bin/kubectl /usr/local/bin/
+  curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.19.2/bin/linux/amd64/kubectl
+  chmod +x kubectl
+  sudo mv kubectl /usr/local/bin/
+  
 }
 
 

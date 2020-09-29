@@ -61,11 +61,12 @@ done
 
 This is the NEW way
 {
-  wget -q --show-progress --https-only --timestamping https://github.com/kubernetes/kubernetes/releases/download/v1.18.8/kubernetes.tar.gz
-  tar -xvf kubernetes.tar.gz
-  echo "Y" | ./kubernetes/cluster/get-kube-binaries.sh
-  tar -xvf kubernetes/server/kubernetes-server-linux-amd64.tar.gz
-  tar -xvf kubernetes/client/kubernetes-client-linux-amd64.tar.gz
+  cd ~
+  mkdir -p kubernetes_config
+  cd kubernetes_config
+  curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.19.2/bin/linux/amd64/kubectl
+  curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.19.2/bin/linux/amd64/kube-proxy
+  curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.19.2/bin/linux/amd64/kubelet
 }
 
 wget -q --show-progress --https-only --timestamping \
@@ -94,8 +95,8 @@ Install the worker binaries:
 
 This is the NEW way
 {
-  chmod +x kubernetes/client/bin/kubectl kubernetes/server/bin/kube-proxy kubernetes/server/bin/kubelet
-  sudo mv kubernetes/client/bin/kubectl kubernetes/server/bin/kube-proxy kubernetes/server/bin/kubelet /usr/local/bin/
+  chmod +x kubectl kube-proxy kubelet
+  sudo mv kubectl kube-proxy kubelet /usr/local/bin/
 }
 
 {
@@ -318,6 +319,11 @@ clusterDNS:
 resolvConf: "/run/systemd/resolve/resolv.conf"
 runtimeRequestTimeout: "15m"
 readOnlyPort: 10255
+rotateCertificates: true
+serverTLSBootstrap: true
+featureGates:
+  RotateKubeletClientCertificate: true
+  RotateKubeletServerCertificate: true
 EOF
 ```
 
@@ -344,11 +350,8 @@ ExecStart=/usr/local/bin/kubelet \\
   --image-pull-progress-deadline=2m \\
   --kubeconfig=/var/lib/kubelet/kubeconfig \\
   --cert-dir=/var/lib/kubelet/pki/ \\
-  --rotate-certificates=true \\
-  --rotate-server-certificates=true \\
   --network-plugin=cni \\
   --register-node=true \\
-  --allow-privileged=true \\
   --cni-conf-dir=/etc/cni/net.d \\
   --v=2
 Restart=on-failure
@@ -413,6 +416,10 @@ EOF
   sudo systemctl enable kubelet kube-proxy
   sudo systemctl start kubelet kube-proxy
 }
+
+  sudo systemctl daemon-reload && sudo systemctl stop kubelet kube-proxy && sudo systemctl start kubelet kube-proxy
+
+
 ```
 Check the status of the service
 sudo service kubelet status

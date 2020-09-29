@@ -39,16 +39,16 @@ subjects:
   name: metrics-server
   namespace: kube-system
 ---
-apiVersion: apiregistration.k8s.io/v1beta1
+apiVersion: apiregistration.k8s.io/v1
 kind: APIService
 metadata:
-  name: v1beta1.metrics.k8s.io
+  name: v1.metrics.k8s.io
 spec:
   service:
     name: metrics-server
     namespace: kube-system
   group: metrics.k8s.io
-  version: v1beta1
+  version: v1
   insecureSkipTLSVerify: true
   groupPriorityMinimum: 100
   versionPriority: 100
@@ -112,7 +112,7 @@ spec:
       # mount in tmp so we can safely use from-scratch images and/or read-only containers
       - name: tmp-dir
         emptyDir: {}
-      # hostNetwork: true
+      hostNetwork: true
       containers:
       - name: metrics-server
         image: k8s.gcr.io/metrics-server-amd64:v0.3.6
