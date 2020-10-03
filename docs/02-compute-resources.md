@@ -135,6 +135,25 @@ sudo swapon --show
     sudo ufw allow 6784/udp
 }
 
+Control-plane nodes
+
+{
+    sudo ufw allow 6443/tcp
+    sudo ufw allow 2379/tcp
+    sudo ufw allow 2380/tcp
+    sudo ufw allow 10250/tcp
+    sudo ufw allow 10251/tcp
+    sudo ufw allow 10252/tcp
+    sudo ufw allow 10255/tcp
+}
+
+worker nodes
+{
+    sudo ufw allow 10250/tcp
+    sudo ufw allow 10255/tcp
+    sudo ufw allow 30000:32767/tcp
+}
+
 {
   sudo sysctl net.ipv4.ip_forward=1
   echo "net.ipv4.ip_forward=1" | sudo tee -a /etc/sysctl.conf

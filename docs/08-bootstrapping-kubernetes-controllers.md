@@ -126,8 +126,8 @@ ExecStart=/usr/local/bin/kube-apiserver \\
   --kubelet-client-certificate=/var/lib/kubernetes/kube-apiserver.crt \\
   --kubelet-client-key=/var/lib/kubernetes/kube-apiserver.key \\
   --kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname \\
-  --requestheader-client-ca-file=/var/lib/kubernetes/kube-proxy.crt \\
-  --requestheader-allowed-names=front-proxy-client \\
+  --requestheader-client-ca-file=/var/lib/kubernetes/ca.crt \\
+  --requestheader-allowed-names="" \\
   --requestheader-extra-headers-prefix=X-Remote-Extra- \\
   --requestheader-group-headers=X-Remote-Group \\
   --requestheader-username-headers=X-Remote-User \\
@@ -228,6 +228,13 @@ EOF
   sudo systemctl enable kube-apiserver kube-controller-manager kube-scheduler
   sudo systemctl start kube-apiserver kube-controller-manager kube-scheduler
 }
+Restarting controllers 
+{
+  sudo systemctl daemon-reload 
+  sudo systemctl stop kube-apiserver kube-controller-manager kube-scheduler && sudo systemctl start kube-apiserver kube-controller-manager kube-scheduler
+}
+sudo systemctl daemon-reload && sudo  systemctl restart kube-apiserver
+
 ```
 
 > Allow up to 10 seconds for the Kubernetes API Server to fully initialize.
