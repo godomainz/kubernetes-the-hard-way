@@ -64,9 +64,9 @@ This is the NEW way
   cd ~
   mkdir -p kubernetes_config
   cd kubernetes_config
-  curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.19.2/bin/linux/amd64/kubectl
-  curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.19.2/bin/linux/amd64/kube-proxy
-  curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.19.2/bin/linux/amd64/kubelet
+  curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.18.6/bin/linux/amd64/kubectl
+  curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.18.6/bin/linux/amd64/kube-proxy
+  curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.18.6/bin/linux/amd64/kubelet
 }
 
 wget -q --show-progress --https-only --timestamping \
@@ -93,16 +93,11 @@ Install the worker binaries:
 
 ```
 
-This is the NEW way
 {
   chmod +x kubectl kube-proxy kubelet
   sudo mv kubectl kube-proxy kubelet /usr/local/bin/
 }
 
-{
-  chmod +x kubectl kube-proxy kubelet
-  sudo mv kubectl kube-proxy kubelet /usr/local/bin/
-}
 ```
 ### Move the ca certificate
 
@@ -137,7 +132,7 @@ stringData:
   token-secret: f395accd246ae52d
 
   # Expiration. Optional.
-  expiration: 2021-03-10T03:22:11Z
+  expiration: 2025-03-10T03:22:11Z
 
   # Allowed usages.
   usage-bootstrap-authentication: "true"
@@ -319,11 +314,6 @@ clusterDNS:
 resolvConf: "/run/systemd/resolve/resolv.conf"
 runtimeRequestTimeout: "15m"
 readOnlyPort: 10255
-rotateCertificates: true
-serverTLSBootstrap: true
-featureGates:
-  RotateKubeletClientCertificate: true
-  RotateKubeletServerCertificate: true
 EOF
 ```
 
@@ -350,6 +340,8 @@ ExecStart=/usr/local/bin/kubelet \\
   --image-pull-progress-deadline=2m \\
   --kubeconfig=/var/lib/kubelet/kubeconfig \\
   --cert-dir=/var/lib/kubelet/pki/ \\
+  --rotate-certificates=true \\
+  --rotate-server-certificates=true \\
   --network-plugin=cni \\
   --register-node=true \\
   --cni-conf-dir=/etc/cni/net.d \\

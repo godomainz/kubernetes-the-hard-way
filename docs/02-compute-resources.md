@@ -89,7 +89,7 @@ EOF
 - Runs the below command on all nodes to allow for network forwarding in IP Tables.
   This is required for kubernetes networking to function correctly.
     > sudo sysctl net.bridge.bridge-nf-call-iptables=1
-sudo modprobe br_netfilter && sudo sysctl -p /etc/sysctl.conf && sudo sysctl net.bridge.bridge-nf-call-iptables=1
+sudo modprobe br_netfilter && sudo sysctl -p /etc/sysctl.conf && sudo sysctl net.bridge.bridge-nf-call-iptables=1 && sudo sysctl --system
 
 - trun off swap
 cat > ~/swapoff.sh <<EOF
@@ -138,6 +138,7 @@ sudo swapon --show
 Control-plane nodes
 
 {
+    sudo ufw allow 443/tcp
     sudo ufw allow 6443/tcp
     sudo ufw allow 2379/tcp
     sudo ufw allow 2380/tcp

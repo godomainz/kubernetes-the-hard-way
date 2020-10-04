@@ -30,10 +30,10 @@ This is the NEW way
   mkdir -p kubernetes_config
   cd kubernetes_config
   
-  curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.19.2/bin/linux/amd64/kube-apiserver
-  curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.19.2/bin/linux/amd64/kube-controller-manager
-  curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.19.2/bin/linux/amd64/kube-scheduler
-  curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.19.2/bin/linux/amd64/kubectl
+  curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.18.6/bin/linux/amd64/kube-apiserver
+  curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.18.6/bin/linux/amd64/kube-controller-manager
+  curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.18.6/bin/linux/amd64/kube-scheduler
+  curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.18.6/bin/linux/amd64/kubectl
 }
 
 
@@ -126,8 +126,8 @@ ExecStart=/usr/local/bin/kube-apiserver \\
   --kubelet-client-certificate=/var/lib/kubernetes/kube-apiserver.crt \\
   --kubelet-client-key=/var/lib/kubernetes/kube-apiserver.key \\
   --kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname \\
-  --requestheader-client-ca-file=/var/lib/kubernetes/ca.crt \\
-  --requestheader-allowed-names="" \\
+  --requestheader-client-ca-file=/var/lib/kubernetes/kube-proxy.crt \\
+  --requestheader-allowed-names= \\
   --requestheader-extra-headers-prefix=X-Remote-Extra- \\
   --requestheader-group-headers=X-Remote-Group \\
   --requestheader-username-headers=X-Remote-User \\
@@ -234,6 +234,14 @@ Restarting controllers
   sudo systemctl stop kube-apiserver kube-controller-manager kube-scheduler && sudo systemctl start kube-apiserver kube-controller-manager kube-scheduler
 }
 sudo systemctl daemon-reload && sudo  systemctl restart kube-apiserver
+
+sudo service kube-apiserver status
+sudo service kube-controller-manager status
+sudo service kube-scheduler status
+
+journalctl -u kube-apiserver -f
+journalctl -u kube-controller-manager -f
+journalctl -u kube-scheduler -f
 
 ```
 
@@ -397,9 +405,9 @@ frontend kubernetes
 ----------------------------------------------------------
 
 ```
-mkdir -p ~/haproxy & cd ~/haproxy
+mkdir -p ~/haproxy && cd ~/haproxy
 
-loadbalancer# cat <<EOF | sudo tee haproxy.cfg 
+cat <<EOF | sudo tee haproxy.cfg 
 frontend kubernetes
     bind 0.0.0.0:6443
     option tcplog
