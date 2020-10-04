@@ -150,7 +150,9 @@ Control-plane nodes
 
 worker nodes
 {
+    sudo ufw allow 443/tcp
     sudo ufw allow 10250/tcp
+    sudo ufw allow 4443/tcp
     sudo ufw allow 10255/tcp
     sudo ufw allow 30000:32767/tcp
 }
