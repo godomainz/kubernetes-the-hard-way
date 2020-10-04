@@ -256,9 +256,21 @@ etcd-1               Healthy   {"health": "true"}
 
 > Remember to run the above commands on each controller node: `master-1`, and `master-2`.
 
+
+## Enable kubectl autocompletion
+
+{
+  source /usr/share/bash-completion/bash_completion
+  echo 'source <(kubectl completion bash)' >>~/.bashrc
+  echo 'alias k=kubectl' >>~/.bashrc
+  echo 'complete -F __start_kubectl k' >>~/.bashrc
+  exec bash
+}
+
 ## The Kubernetes Frontend Load Balancer
 
-In this section you will provision an external load balancer to front the Kubernetes API Servers. The `kubernetes-the-hard-way` static IP address will be attached to the resulting load balancer.
+In this section you will provision an external load balancer to front the Kubernetes API Servers. The `kubernetes-the-hard-way` static IP address will be attached to the resulting load balancer
+
 
 
 ### Provision a Network Load Balancer
