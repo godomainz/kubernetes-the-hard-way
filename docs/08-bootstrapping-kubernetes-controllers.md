@@ -142,6 +142,7 @@ ExecStart=/usr/local/bin/kube-apiserver \\
   --tls-cert-file=/var/lib/kubernetes/kube-apiserver.crt \\
   --tls-private-key-file=/var/lib/kubernetes/kube-apiserver.key \\
   --runtime-config=settings.k8s.io/v1alpha1=true \\
+  --runtime-config=authorization.k8s.io/v1beta1=true \\
   --allow-privileged=true \\
   --v=2
 Restart=on-failure
