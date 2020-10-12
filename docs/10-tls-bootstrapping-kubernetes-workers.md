@@ -384,6 +384,8 @@ EOF
 Create the `kube-proxy.service` systemd unit file:
 
 ```
+sudo apt install conntrack -y
+
 cat <<EOF | sudo tee /etc/systemd/system/kube-proxy.service
 [Unit]
 Description=Kubernetes Kube Proxy
